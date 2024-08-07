@@ -1,0 +1,15 @@
+1. Generate an overall folder for all the services, in this case it will be named 'ticketing'
+2. Create 'auth' folder for our auth service
+3. Inside the auth directory, run 'npm init -y' to initialize an npm-based js project.
+4. Install dependecies:
+    - typescript
+    - ts-node-dev
+    - express
+    - @types/express
+5. Generate a tsconfig file by running 'tsc --init
+6. Under auth directory, create a new directory named 'src'
+7. Inside src directory, create index.ts file
+8. Add initial express setup
+9. Add kubernetes setup for auth
+10. Add skaffold setup
+11. Setup ingress
