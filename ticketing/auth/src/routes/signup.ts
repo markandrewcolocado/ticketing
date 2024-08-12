@@ -43,7 +43,7 @@ router.post(
         id: user.id,
         email: user.email,
       },
-      'asdf'
+      process.env.JWT_KEY! // Adding exclamation marks that the value of a variable is surely defined
     );
 
     // Store it on session object

@@ -20,16 +20,28 @@ interface UserDoc extends mongoose.Document {
   password: string;
 }
 
-const userSchema = new mongoose.Schema({
-  email: {
-    type: String, // we are referring to types related to mongoose and not on typescript
-    required: true,
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String, // we are referring to types related to mongoose and not on typescript
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
   },
-  password: {
-    type: String,
-    required: true,
-  },
-});
+  {
+    toJSON: {
+      transform(doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.password; // delete is a js function that deletes a property off an object
+        delete ret.__v;
+      },
+    },
+  }
+);
 
 // A middleware function implemented in Mongoose
 // This function will run before an attempt to save a document to our database.

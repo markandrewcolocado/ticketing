@@ -15,6 +15,12 @@ spec: # specify how the deployment should be behave
       containers:
         - name: auth
           image: markandrew05/auth
+          env:
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_KEY
           # imagePullPolicy: Never # This will ensure that Kubernetes will use the image built locally
 ---
 apiVersion: v1
