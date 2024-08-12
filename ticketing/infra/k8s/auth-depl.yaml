@@ -14,7 +14,7 @@ spec: # specify how the deployment should be behave
     spec: # the specification/configuration options of the pod/container that we are trying to make
       containers:
         - name: auth
-          image: markandrew05/auth
+          image: us.gcr.io/ticketing-dev-431811/auth
           # imagePullPolicy: Never # This will ensure that Kubernetes will use the image built locally
 ---
 apiVersion: v1

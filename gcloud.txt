@@ -1,0 +1,93 @@
+GCLOUD
+INSTALLATION
+1. Go to https://cloud.google.com/sdk/docs/install-sdk and install gcloud CLI
+2. Install gcloud auth plugin by running the command:
+    - gcloud components install gke-gcloud-auth-plugin
+
+
+INITIALIZATION
+1. run 'gcloud init' on terminal
+
+
+INSTALL GCLOUD CONTEXT
+- Connect to gcloud clusters
+gcloud container clusters get-credentials ticketing-dev --region=asia-southeast1
+- you can check if you are connected to the gcloud clusters by running the command 'kubectl get namespaces'
+- it should output something similar to:
+NAME                       STATUS   AGE
+default                    Active   12h
+kube-node-lease            Active   12h
+kube-public                Active   12h
+kube-system                Active   12h
+
+
+ENABLE GCLOUD BUILD ON YOUR GCLOUD APP
+1. Enable gcloud on your gcloud app.
+    - go to https://console.cloud.google.com/cloud-build/builds
+    - select your application, and click ENABLE button to enable the Cloud Build API
+
+
+UPDATE LOCAL FILES
+1. Update skaffold.yaml file, sample data
+apiVersion: skaffold/v2alpha3
+kind: Config
+deploy:
+  kubectl:
+    manifests:
+      - ./infra/k8s/* # skaffold will watch the changes to this location
+build:
+  # local:
+  #   push: false # disable pushing image to the docker hub since this is not required when using skaffold
+  googleCloudBuild:
+    projectId: ticketing-dev-431811
+  artifacts: # tells skaffold about something inside of our project that it needs to maintain (updates changes to the pod)
+    - image: us.gcr.io/ticketing-dev-431811/auth # gcloud always name the image as us.gcr.io/project_id/srv_name
+      context: auth # directory of the project
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts' # if the updated file is not in this directory, skaffold will rebuild the image and update the deployment tied to it
+            dest: .
+2. Update depl.yaml file, change spec.template.spec.containers.image
+  - before: markandrew05/auth
+  - after: us.gcr.io/ticketing-dev-431811/auth
+
+
+INSTALL/SETUP INGRESS ON GCLOUD CLUSTER
+1. When you are using Docker for desktop and gcloud service at the same time, make sure you are connected the gcloud context.
+    - On your system tray icons, right click Docker icon, select 'Kubernetes Context', then select 'gke_ticketing-dev...'
+    - this will connect you to the cloud context
+2. Go to your terminal and run the code:
+  - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.1/deploy/static/provider/cloud/deploy.yaml
+  - this is from the ingress nginx documentation on how to install ingress - https://kubernetes.github.io/ingress-nginx/deploy/
+3. Additional command when using gcloud - https://kubernetes.github.io/ingress-nginx/deploy/#gce-gke
+  3.1 Add cluster-admin permission using this command
+kubectl create clusterrolebinding cluster-admin-binding --clusterrole cluster-admin --user markandrew.colocado@gmail.com
+  3.2 Then install ingress controller using this command
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.1/deploy/static/provider/cloud/deploy.yaml
+
+
+UPDATE HOST FILE
+- After installing ingress on our gcloud cluster, it also creates a LOAD BALANCER.
+- Now we can connect to that load balancer to access different pods on our gcloud cluster
+- Get the IP of the load balancer from the gcloud dashboard
+    - Go to https://console.cloud.google.com/
+    - Select your project
+    - Search 'Load balancing', then select Load Balancing (Network Services)
+    - Click the name of the load balancer created then copy the IP:Port (35.197.146.92:80-443)
+- Setup our host file and change the IP address of ticketing.dev
+    - Change the IP of ticketing.dev
+      - before: 127.0.0.1 ticketing.dev
+      - after: 35.197.146.92 ticketing.dev
+
+
+RESTART SKAFFOLD
+- Go to your terminal, go to the location of your skaffold.yaml file
+- Make sure you shutdown any instances of skaffold that is running
+- Run the command: 'skaffold dev'
+
+
+ACCESSING THE APP IN THE BROWSER
+- Now you can access the app in your browser 
+  - ticketing.dev/api/users/currentuser
