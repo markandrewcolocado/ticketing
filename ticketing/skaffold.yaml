@@ -5,12 +5,10 @@ deploy:
     manifests:
       - ./infra/k8s/* # skaffold will watch the changes to this location
 build:
-  # local:
-  #   push: false # disable pushing image to the docker hub since this is not required when using skaffold
-  googleCloudBuild:
-    projectId: ticketing-dev-431811
+  local:
+    push: false # disable pushing image to the docker hub since this is not required when using skaffold
   artifacts: # tells skaffold about something inside of our project that it needs to maintain (updates changes to the pod)
-    - image: us.gcr.io/ticketing-dev-431811/auth # gcloud always name the image as us.gcr.io/project_id/srv_name
+    - image: markandrew05/auth
       context: auth # directory of the project
       docker:
         dockerfile: Dockerfile
