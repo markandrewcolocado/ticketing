@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY ./package.json ./
-RUN npm install
+RUN npm install --omit=dev
 COPY ./ ./
 
 # Default start command
